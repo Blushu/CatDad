@@ -1,4 +1,4 @@
 # CatDad
-Indie Video Game exploring the trials and tribulations of feline fatherhood in a rustic urban setting.
+An Indie Platform Adventure through the Ups and Down of Feline Fatherhood.
 
-Open part1.html to begin, refresh the page to start over.
+Open index.html to begin, refresh the page to start over.
