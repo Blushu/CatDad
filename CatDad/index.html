@@ -1,0 +1,231 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>CATDAD - An Indie Platform Adventure Through the Ups and Downs of Feline Fatherhood</title>
+    <script src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+// Add the Score & Score Text
+var readyPlayerOne;
+var startGame = false;
+var score = 0;
+var scoreText;
+var gameOverText; 
+var winText;
+var jumped = false;
+
+
+function preload() {
+    game.load.image('sky', 'assets/sky.png');
+    game.load.image('ground', 'assets/platform.png');
+    game.load.image('star', 'assets/star.png');
+    game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
+    game.load.spritesheet('catDad', 'assets/catDad_Sheet.png', 32, 32);
+}
+    
+    
+    
+    
+    
+    
+
+function create() {
+    
+    if (startGame == false) {
+
+        // Enable the Arcade Physics system
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+
+        // Add a Background ***sprites are layered in the order their added in, i.e. background, platforms, players
+        game.add.sprite(0, 0, 'sky');
+        readyPlayerOne = game.add.text(100, 200, 'Ready Player One \n Collect all the stars, and watch out for baddies! \n Use Arrow keys to move and jump. \n Press Down arrow to begin.', {fontSize: '32px', fill: '#000'});
+    
+    }
+    
+    if (startGame == true) {
+    /*** STAGE ***/
+        // The platforms group contains the ground and the ledges we can jump on
+        platforms = game.add.group();
+
+        // We will enable physics for any object that is created in this group
+        platforms.enableBody = true;
+
+        // Here we create the ground *** takes the position in x and y, and the name of an asset
+        var ground = platforms.create(0, game.world.height - 64, 'ground');
+
+        // Scale it to fit the width of the game (orgnl sprite is 400x32)
+        ground.scale.setTo(2,2);
+
+        // Stop the ground from falling away when jumped on
+        ground.body.immovable = true;
+
+        // Create 2 ledges
+        var ledge = platforms.create( 400, 400, 'ground');
+        ledge.body.immovable = true;
+        ledge = platforms.create(-150, 250, 'ground');
+        ledge.body.immovable = true;
+
+
+
+
+
+    /*** CATDAD ***/
+        player = game.add.sprite( game.world.width/2 - 16, game.world.height - 150, 'catDad' );
+        game.physics.arcade.enable(player);
+        player.body.gravity.y = 400;
+        player.body.collideWorldBounds = true;
+        player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
+        player.animations.add( 'left', [11,12,13,14,15,16,17], 10, true );
+        player.scale.setTo(2,2);
+
+
+
+
+    /*** STARS ***/
+      // Create the stars group, add physics to the stars
+        stars = game.add.group();
+        stars.enableBody = true;
+
+        // create 12 stars evenly spaced apart
+        for (i = 0; i < 12; i++) {
+            // create a star in the 'stars' group
+            var star = stars.create(i*70, 0, 'star');
+
+            // give them gravity so they fall
+            star.body.gravity.y = 60;
+
+            // Give each star a slightly random bounce value
+            star.body.bounce.y = ( 0.7 + ( Math.random()*0.2 ) );
+        }
+
+
+    /*** BADGUYS ***/    
+        badGuy = game.add.sprite(0, game.world.height - 150, 'baddie');
+        game.physics.arcade.enable(badGuy);
+        badGuy.body.gravity.y = 300;
+        badGuy.body.collideWorldBounds = true;
+        badGuy.animations.add('left', [0,1], 6, true);
+        badGuy.animations.add('right', [2,3], 6, true);
+
+
+
+
+    /*** SCORE ***/
+        scoreText = game.add.text(16, 16, 'Score: 0', {fontSize: '32px', fill: '#000'});
+
+    }
+}
+    
+    
+    
+    
+
+function update() {
+    
+    // *** CONTROLLER ***/
+    // this populates the cursors object with four properties: up, down, left, & right. All instances of Phaser.Key objects
+    cursors = game.input.keyboard.createCursorKeys();
+    
+    if (startGame == false) {
+        if (cursors.down.isDown) {
+            readyPlayerOne.text = '';
+            startGame = true;
+            create();
+        }
+    }
+
+ 
+    if (startGame == true) {
+    /*** PLAYER ***/    
+
+        // Collide the player and the stars with the platforms
+        var hitPlatform = game.physics.arcade.collide(player, platforms); 
+
+        if (cursors.left.isDown) {
+            // Move Left, Animate Left
+            player.body.velocity.x = -170;
+            player.animations.play('left');
+        }
+        else if (cursors.right.isDown) {
+            // Move Right, Animate Right
+            player.body.velocity.x = 170;
+            player.animations.play('right');
+        }
+        else if (player.body.velocity.x > 0) {
+            player.animations.stop();
+            player.frame = 0;
+            player.body.velocity.x = 0;
+        }
+        else {
+            player.animations.stop();
+            player.frame = 1;
+            player.body.velocity.x = 0;       
+        }
+
+
+
+        // *** JUMP LOGIC ***
+        if (cursors.up.isUp) { jumped = false; }
+        if (cursors.up.isDown && player.body.touching.down && hitPlatform && jumped == false) {
+            // velocity of 350 px/sec^2
+            player.body.velocity.y = -350;
+            jumped = true;
+        }
+
+
+
+    /*** STARS ***/    
+        // Collide Stars with platforms
+        game.physics.arcade.collide(stars, platforms);
+        // check for star collision with the player, if found, pass player and star to the 'collectStar' function
+        game.physics.arcade.overlap(player, stars, collectStar, null, this);
+        function collectStar (player, star) {
+            // Removes the star from the screen
+            star.kill();
+
+            // Increment and update the score
+            score += 10;
+            scoreText.text = 'Score: ' + score;
+        }
+
+    /*** BADGUYS ***/ 
+
+        game.physics.arcade.collide(badGuy, platforms);
+        if ( badGuy.body.x==0 && badGuy.body.touching.down ) {
+            badGuy.body.velocity.x = 100;
+            badGuy.animations.play('right');
+        } else if (badGuy.body.x==(game.world.width - 32) && badGuy.body.touching.down) {
+            badGuy.body.velocity.x = -100;
+            badGuy.animations.play('left');
+        }
+
+        // Check for badGuy/player collision, if found, pass player and badGuy to gameOver function
+        game.physics.arcade.overlap(player, badGuy, gameOver, null, this);
+        function gameOver (player, badGuy) {
+            game.paused = true;
+            // fill and display gameOverText
+            gameOverText = game.add.text(16, 48, 'GAME OVER...', {fontsize:'256px', fill: '#ff0000'});
+        }
+
+        // Check for Winner
+        if (score == 120) {
+            game.paused = true;
+            winText = game.add.text(16, 48, 'YOU WIN!', {fontsize: '256px', fill: '#00ff00'});
+        }
+    }   
+}
+
+</script>
+
+</body>
+</html>
