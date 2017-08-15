@@ -31,6 +31,7 @@ function preload() {
     game.load.image('star', 'assets/star.png');
     game.load.spritesheet('baddie', 'assets/baddie.png', 32, 32);
     game.load.spritesheet('catDad', 'assets/catDad_Sheet.png', 32, 32);
+    game.load.spritesheet('cat', 'assets/CatSprite_Sheet.png', 18, 19);
 }
     
     
@@ -87,6 +88,14 @@ function create() {
         player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
         player.animations.add( 'left', [11,12,13,14,15,16,17], 10, true );
         player.scale.setTo(2,2);
+    /*** CAT ***/
+        cat = game.add.sprite( player.body.x + 64, game.world.height - 150, 'cat' );
+        game.physics.arcade.enable(cat);
+        cat.body.gravity.y = 400;
+        cat.body.collideWorldBouncs = true;
+        cat.animations.add('right', [2,3,4,5,6,7], 10, true);
+        cat.animations.add('left', [8,9,10,11,12,13], 10, true);
+        cat.scale.setTo(2,2);
 
 
 
@@ -148,7 +157,7 @@ function update() {
     if (startGame == true) {
     /*** PLAYER ***/    
 
-        // Collide the player and the stars with the platforms
+        // Collide the player with platforms
         var hitPlatform = game.physics.arcade.collide(player, platforms); 
 
         if (cursors.left.isDown) {
@@ -162,14 +171,14 @@ function update() {
             player.animations.play('right');
         }
         else if (player.body.velocity.x > 0) {
+            player.body.velocity.x = 0;
             player.animations.stop();
             player.frame = 0;
-            player.body.velocity.x = 0;
         }
-        else {
+        else if (player.body.velocity.x < 0) {
+            player.body.velocity.x = 0;
             player.animations.stop();
-            player.frame = 1;
-            player.body.velocity.x = 0;       
+            player.frame = 1;       
         }
 
 
@@ -181,6 +190,26 @@ function update() {
             player.body.velocity.y = -350;
             jumped = true;
         }
+    /*** CAT ***/
+        // Collide cat with platforms
+        game.physics.arcade.collide(cat, platforms);
+        
+        if ( player.body.x + 64 >= cat.body.x && player.body.x + 62 <= cat.body.x) {
+            cat.body.velocity.x = 0;
+            cat.animations.stop();
+            cat.frame = 1;
+        } else if ( player.body.x - 18 <= cat.body.x && player.body.x - 16 >= cat.body.x ) {
+            cat.body.velocity.x = 0;
+            cat.animations.stop();
+            cat.frame = 0;
+        } else if ( player.body.x + 84 < cat.body.x ) {
+            cat.body.velocity.x = -140;
+            cat.animations.play('left');
+        } else if ( player.body.x - 38 > cat.body.x ) {
+            cat.body.velocity.x = 140;
+            cat.animations.play('right');
+        }
+        
 
 
 
