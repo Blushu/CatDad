@@ -10,7 +10,8 @@ var playState = {
         
         game.add.sprite(0, 0, 'sky');
         
-        /*** STAGE ***/
+        /*
+        /*** STAGE ***
         // The platforms group contains the ground and the ledges we can jump on
         platforms = game.add.group();
         // We will enable physics for any object that is created in this group
@@ -26,12 +27,50 @@ var playState = {
         ledge.body.immovable = true;
         ledge = platforms.create(-150, 250, 'ground');
         ledge.body.immovable = true;
+        */
+        
+        
+        /*** SIDEWALK ***/
+        sidewalkBL = game.add.group();
+        sidewalkBL.enableBody = true;
+        for (i=0; i<60; i++) {
+            var sidewalk = sidewalkBL.create(i*16, game.world.height-9, 'sideWalkBL');
+            sidewalk.scale.setTo(2,2);
+            sidewalk.body.immovable = true;
+        }
+        
+        sidewalkTL = game.add.group();
+        for (i=0; i<60; i++) {
+            var sidewalk = sidewalkTL.create(i*16, game.world.height-18, 'sideWalkTL');
+            sidewalk.scale.setTo(2,2);
+        }
+        
+        /*** BUILDING ***/
+        home = game.add.sprite(200, game.world.height - (273*2 + 16), 'home');
+        home.scale.setTo(2,2);
+        // BUILDING LEDGES
+        homeLedges = game.add.group();
+        homeLedges.enableBody = true;
+        for (i=0; i<4; i++) {
+            var homeLedge = homeLedges.create(210, game.world.height - (184 + i*120), 'homeLedge');
+            homeLedge.scale.setTo(2,2);
+            homeLedge.body.immovable = true;
+        }
+        
+        /*** TRASH CAN ***/
+        trashCans = game.add.group();
+        trashCans.enableBody = true;
+        for (i=0; i<1; i++) {
+            var trashCan = trashCans.create(400, game.world.height - (20*2 + 16), 'trashCan');
+            trashCan.scale.setTo(2,2);
+            trashCan.body.immovable = true;
+        }
 
 
 
 
         /*** PLAYER ***/
-        player = game.add.sprite( game.world.width/2 - 16, game.world.height - 150, 'catDad' );
+        player = game.add.sprite( game.world.width*0.8 - 16, game.world.height - 150, 'catDad' );
         game.physics.arcade.enable(player);
         player.body.gravity.y = 400;
         player.body.collideWorldBounds = true;
@@ -93,15 +132,20 @@ var playState = {
             game.state.start('win');
         }
         
+        
         /*** CONTROLLER ***/
         // this populates the cursors object with four properties: up, down, left, & right. All instances of Phaser.Key objects
         cursors = game.input.keyboard.createCursorKeys();
 
  
         /*** PLAYER ***/    
-
         // Collide the player with platforms
-        var hitPlatform = game.physics.arcade.collide(player, platforms); 
+        //var hitPlatform = game.physics.arcade.collide(player, platforms);
+        var hitsideWalkL = game.physics.arcade.collide(player, sidewalkBL);
+        //var hitsideWalkR = game.physics.arcade.collide(player, sidewalkBR);
+        var hittrashCan = game.physics.arcade.collide(player, trashCans);
+        var hithomeLedge = game.physics.arcade.collide(player, homeLedges);
+        
 
         if (cursors.left.isDown) {
             // Move Left, Animate Left
@@ -126,7 +170,7 @@ var playState = {
         
         // JUMP LOGIC 
         if (cursors.up.isUp) { game.global.jumped = false; }
-        if (cursors.up.isDown && player.body.touching.down && hitPlatform && game.global.jumped == false) {
+        if (cursors.up.isDown && player.body.touching.down && (hitsideWalkL || hittrashCan || hithomeLedge) && game.global.jumped == false) {
             // velocity of 350 px/sec^2
             player.body.velocity.y = -350;
             game.global.jumped = true;
@@ -135,7 +179,7 @@ var playState = {
         
         /*** CAT ***/
         // Collide cat with platforms
-        game.physics.arcade.collide(cat, platforms);
+        game.physics.arcade.collide(cat, sidewalkBL);
         
         if ( player.body.x + 64 >= cat.body.x && player.body.x + 62 <= cat.body.x) {
             cat.body.velocity.x = 0;
@@ -158,7 +202,7 @@ var playState = {
 
         /*** STARS ***/    
         // Collide Stars with platforms
-        game.physics.arcade.collide(stars, platforms);
+        game.physics.arcade.collide(stars, sidewalkBL);
         // check for star collision with the player, if found, pass player and star to the 'collectStar' function
         game.physics.arcade.overlap(player, stars, collectStar, null, this);
         
@@ -172,7 +216,7 @@ var playState = {
         }
 
         /*** BADGUYS ***/ 
-        game.physics.arcade.collide(badGuy, platforms);
+        game.physics.arcade.collide(badGuy, sidewalkBL);
         if ( badGuy.body.x==0 && badGuy.body.touching.down ) {
             badGuy.body.velocity.x = 100;
             badGuy.animations.play('right');
@@ -183,10 +227,9 @@ var playState = {
 
         // Check for badGuy/player collision, if found, pass player and badGuy to gameOver function
         game.physics.arcade.overlap(player, badGuy, gameOver, null, this);
+        
         function gameOver (player, badGuy) {
-            //game.paused = true;
-            // fill and display gameOverText
-            gameOverText = game.add.text(16, 48, 'GAME OVER...', {fontsize:'256px', fill: '#ff0000'});
+            game.state.start('gameOver');
         }
         
     },
