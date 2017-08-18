@@ -4,7 +4,8 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameDiv');
 game.global = {
     score : 0,
     scoreText : '',
-    jumped : false
+    jumped : false,
+    facing : 'left'
 };
 
 // Add each state

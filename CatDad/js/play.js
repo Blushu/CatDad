@@ -6,66 +6,81 @@ var playState = {
         game.global.score = 0;
         game.global.scoreText = '';
         game.global.jumped = false;
+        game.global.facing = 'left';
         
-        
+        // Add background
         game.add.sprite(0, 0, 'sky');
         
-        /*** STAGE ***/
-        // The platforms group contains the ground and the ledges we can jump on
-        platforms = game.add.group();
-        // We will enable physics for any object that is created in this group
-        platforms.enableBody = true;
-        // Here we create the ground, *** takes the position in x and y, and the name of an asset
-        var ground = platforms.create(0, game.world.height - 64, 'ground');
-        // Scale it to fit the width of the game (orgnl sprite is 400x32)
-        ground.scale.setTo(2,2);
-        // Stop the ground from falling away when jumped on
-        ground.body.immovable = true;
-        // Create 2 ledges
-        var ledge = platforms.create( 400, 400, 'ground');
-        ledge.body.immovable = true;
-        ledge = platforms.create(-150, 250, 'ground');
-        ledge.body.immovable = true;
+        
+        /*** SIDEWALK ***/
+        // walkable sidewalk, bottom half
+        bottomSidewalks = game.add.group();
+        bottomSidewalks.enableBody = true;
+        for (i=0; i<30; i++) {
+            var sidewalk = bottomSidewalks.create( (i*32 - 8), (game.world.height - 18), 'bottomSidewalk');
+            sidewalk.body.immovable = true;
+        }
+        // decorative sidewalk, top half
+        topSidewalks = game.add.group();
+        for (i=0; i<60; i++) {
+            var sidewalk = topSidewalks.create( (i*32 - 16), (game.world.height - 36), 'topSidewalk');
+        }
+        
+        /*** BUILDING ***/
+        home = game.add.sprite(200, game.world.height - (546 + 34), 'home');
+        // BUILDING LEDGES
+        homeLedges = game.add.group();
+        homeLedges.enableBody = true;
+        for (i=0; i<3; i++) {
+            var homeLedge = homeLedges.create(210, game.world.height - (204 + i*120), 'homeLedge');
+            homeLedge.body.immovable = true;
+        }
+        
+        /*** TRASH CAN ***/
+        trashCans = game.add.group();
+        trashCans.enableBody = true;
+        for (i=0; i<1; i++) {
+            var trashCan = trashCans.create(400, game.world.height - (40 + 30), 'trashCan');
+            trashCan.body.immovable = true;
+        }
 
 
 
 
         /*** PLAYER ***/
-        player = game.add.sprite( game.world.width/2 - 16, game.world.height - 150, 'catDad' );
+        player = game.add.sprite( game.world.width*0.8 - 16, game.world.height - 150, 'catDad' );
         game.physics.arcade.enable(player);
         player.body.gravity.y = 400;
         player.body.collideWorldBounds = true;
         player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
         player.animations.add( 'left', [11,12,13,14,15,16,17], 10, true );
-        player.scale.setTo(2,2);
+        
+        
         
         /*** CAT ***/
         cat = game.add.sprite( player.body.x + 64, game.world.height - 150, 'cat' );
         game.physics.arcade.enable(cat);
         cat.body.gravity.y = 400;
         cat.body.collideWorldBouncs = true;
-        cat.animations.add('right', [2,3,4,5,6,7], 10, true);
-        cat.animations.add('left', [8,9,10,11,12,13], 10, true);
-        cat.scale.setTo(2,2);
+        cat.animations.add('right', [2,3,4], 10, true);
+        cat.animations.add('left', [5,6,7], 10, true);
 
 
 
 
-        /*** STARS ***/
-        // Create the stars group, add physics to the stars
-        stars = game.add.group();
-        stars.enableBody = true;
-
-        // create 12 stars evenly spaced apart
+        /*** PIZZAS ***/
+        pizzas = game.add.group();
+        pizzas.enableBody = true;
+        // create 12 pizzas evenly spaced apart
         for (i = 0; i < 12; i++) {
-            // create a star in the 'stars' group
-            var star = stars.create(i*70, 0, 'star');
+            // create a pizza in the 'pizzas' group
+            var pizza = pizzas.create(i*70, 0, 'pizza');
 
             // give them gravity so they fall
-            star.body.gravity.y = 60;
+            pizza.body.gravity.y = 60;
 
-            // Give each star a slightly random bounce value
-            star.body.bounce.y = ( 0.7 + ( Math.random()*0.2 ) );
+            // Give each pizza a slightly random bounce value
+            pizza.body.bounce.y = ( 0.7 + ( Math.random()*0.2 ) );
         }
         
         
@@ -82,16 +97,17 @@ var playState = {
 
 
         /*** SCORE ***/
-        scoreText = game.add.text(16, 16, 'Score: 0', {fontSize: '32px', fill: '#000'});
+        game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/12', {fontSize: '32px', fill: '#000'});
 
     },
     
     update: function() {
         
         /*** CHECK FOR WIN ***/
-        if (game.global.score == 120) {
+        if (game.global.score == 12) {
             game.state.start('win');
         }
+        
         
         /*** CONTROLLER ***/
         // this populates the cursors object with four properties: up, down, left, & right. All instances of Phaser.Key objects
@@ -99,34 +115,38 @@ var playState = {
 
  
         /*** PLAYER ***/    
-
         // Collide the player with platforms
-        var hitPlatform = game.physics.arcade.collide(player, platforms); 
-
+        var hitsideWalk = game.physics.arcade.collide(player, bottomSidewalks);
+        var hittrashCan = game.physics.arcade.collide(player, trashCans);
+        var hithomeLedge = game.physics.arcade.collide(player, homeLedges);
+        
+        // reset the player's velocity
+        player.body.velocity.x = 0;
+        
         if (cursors.left.isDown) {
             // Move Left, Animate Left
             player.body.velocity.x = -170;
             player.animations.play('left');
+            game.global.facing = 'left';
         }
         else if (cursors.right.isDown) {
             // Move Right, Animate Right
             player.body.velocity.x = 170;
             player.animations.play('right');
+            game.global.facing = 'right';
         }
-        else if (player.body.velocity.x > 0) {
-            player.body.velocity.x = 0;
+        else if (game.global.facing === 'right') {
             player.animations.stop();
             player.frame = 0;
         }
-        else if (player.body.velocity.x < 0) {
-            player.body.velocity.x = 0;
+        else if (game.global.facing === 'left') {
             player.animations.stop();
             player.frame = 1;       
         }
         
         // JUMP LOGIC 
         if (cursors.up.isUp) { game.global.jumped = false; }
-        if (cursors.up.isDown && player.body.touching.down && hitPlatform && game.global.jumped == false) {
+        if (cursors.up.isDown && player.body.touching.down && (hitsideWalk || hittrashCan || hithomeLedge) && game.global.jumped == false) {
             // velocity of 350 px/sec^2
             player.body.velocity.y = -350;
             game.global.jumped = true;
@@ -135,7 +155,7 @@ var playState = {
         
         /*** CAT ***/
         // Collide cat with platforms
-        game.physics.arcade.collide(cat, platforms);
+        game.physics.arcade.collide(cat, bottomSidewalks);
         
         if ( player.body.x + 64 >= cat.body.x && player.body.x + 62 <= cat.body.x) {
             cat.body.velocity.x = 0;
@@ -156,23 +176,25 @@ var playState = {
 
 
 
-        /*** STARS ***/    
-        // Collide Stars with platforms
-        game.physics.arcade.collide(stars, platforms);
-        // check for star collision with the player, if found, pass player and star to the 'collectStar' function
-        game.physics.arcade.overlap(player, stars, collectStar, null, this);
+        /*** PIZZAS ***/    
+        // Collide pizzas with platforms
+        game.physics.arcade.collide(pizzas, bottomSidewalks);
+        game.physics.arcade.collide(pizzas, homeLedges);
         
-        function collectStar (player, star) {
-            // Removes the star from the screen
-            star.kill();
+        // check for pizza collision with the player, if found, pass player and pizza to the 'collectPizza' function
+        game.physics.arcade.overlap(player, pizzas, collectPizza, null, this);
+        
+        function collectPizza (player, pizza) {
+            // Removes the pizza from the screen
+            pizza.kill();
 
             // Increment and update the score
-            game.global.score += 10;
-            game.global.scoreText.text = 'Score: ' + game.global.score;
+            game.global.score++;
+            game.global.scoreText.text = 'Pizza: ' + game.global.score + '/12';
         }
 
         /*** BADGUYS ***/ 
-        game.physics.arcade.collide(badGuy, platforms);
+        game.physics.arcade.collide(badGuy, bottomSidewalks);
         if ( badGuy.body.x==0 && badGuy.body.touching.down ) {
             badGuy.body.velocity.x = 100;
             badGuy.animations.play('right');
@@ -183,10 +205,9 @@ var playState = {
 
         // Check for badGuy/player collision, if found, pass player and badGuy to gameOver function
         game.physics.arcade.overlap(player, badGuy, gameOver, null, this);
+        
         function gameOver (player, badGuy) {
-            //game.paused = true;
-            // fill and display gameOverText
-            gameOverText = game.add.text(16, 48, 'GAME OVER...', {fontsize:'256px', fill: '#ff0000'});
+            game.state.start('gameOver');
         }
         
     },
