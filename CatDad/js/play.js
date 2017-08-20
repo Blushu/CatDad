@@ -2,6 +2,9 @@ var playState = {
     
     create: function() {
         
+// Set world bounds larger than the actual canvas       
+game.world.setBounds(0, 0, 1600, 1200);
+        
         // update Global Variable for restart
         game.global.score = 0;
         game.global.scoreText = '';
@@ -9,14 +12,16 @@ var playState = {
         game.global.facing = 'left';
         
         // Add background
-        game.add.sprite(0, 0, 'sky');
+        background = game.add.sprite(0, 0, 'sky');
+        background.scale.setTo(2,2);
+        
         
         
         /*** SIDEWALK ***/
         // walkable sidewalk, bottom half
         bottomSidewalks = game.add.group();
         bottomSidewalks.enableBody = true;
-        for (i=0; i<30; i++) {
+        for (i=0; i<60; i++) {
             var sidewalk = bottomSidewalks.create( (i*32 - 8), (game.world.height - 18), 'bottomSidewalk');
             sidewalk.body.immovable = true;
         }
@@ -31,7 +36,7 @@ var playState = {
         // BUILDING LEDGES
         homeLedges = game.add.group();
         homeLedges.enableBody = true;
-        for (i=0; i<3; i++) {
+        for (i=0; i<4; i++) {
             var homeLedge = homeLedges.create(210, game.world.height - (204 + i*120), 'homeLedge');
             homeLedge.body.immovable = true;
         }
@@ -55,6 +60,11 @@ var playState = {
         player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
         player.animations.add( 'left', [11,12,13,14,15,16,17], 10, true );
         
+//registration point
+player.anchor.setTo(0.5, 0.5);
+
+game.camera.follow(player);
+        
         
         
         /*** CAT ***/
@@ -74,13 +84,13 @@ var playState = {
         // create 12 pizzas evenly spaced apart
         for (i = 0; i < 12; i++) {
             // create a pizza in the 'pizzas' group
-            var pizza = pizzas.create(i*70, 0, 'pizza');
+            var pizza = pizzas.create(i*130 + 10, (game.world.height/2), 'pizza');
 
             // give them gravity so they fall
             pizza.body.gravity.y = 60;
 
             // Give each pizza a slightly random bounce value
-            pizza.body.bounce.y = ( 0.7 + ( Math.random()*0.2 ) );
+            pizza.body.bounce.y = ( 0.2 + ( Math.random()*0.2 ) );
         }
         
         
@@ -180,6 +190,7 @@ var playState = {
         // Collide pizzas with platforms
         game.physics.arcade.collide(pizzas, bottomSidewalks);
         game.physics.arcade.collide(pizzas, homeLedges);
+        game.physics.arcade.collide(pizzas, trashCans);
         
         // check for pizza collision with the player, if found, pass player and pizza to the 'collectPizza' function
         game.physics.arcade.overlap(player, pizzas, collectPizza, null, this);
