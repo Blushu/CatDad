@@ -8,7 +8,7 @@ var menuState = {
         // Controls
         var controls = game.add.text(80, 300, 'Use the arrow keys to move Left and Right \nUse the up arrow to Jump', { font: '25px Arial', fill: '#ffffff' } );
         // Instructions to start
-        var startLabel = game.add.text(80, game.world.height-80, 'press the spacebar to start', { font: '25px Arial', fill: '#ffffff' } );
+        var startLabel = game.add.text(80, 520, 'press the spacebar to start', { font: '25px Arial', fill: '#ffffff' } );
         
         // define the "spacebar" key
         var spacebarKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
