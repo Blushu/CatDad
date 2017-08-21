@@ -10,7 +10,7 @@ var playState = {
         game.global.scoreText = '';
         game.global.jumped = false;
         game.global.facing = 'left';
-        game.global.control = 'player';
+        game.global.control = 'dad';
         
         // Add background
         background = game.add.sprite(0, 0, 'sky');
@@ -60,10 +60,6 @@ var playState = {
         player.body.collideWorldBounds = true;
         player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
         player.animations.add( 'left', [10,11,12,13,14,15,16,17], 10, true );
-        //registration point for camera
-        player.anchor.setTo(0.5, 0.5);
-        game.camera.follow(player);
-        
         
         
         /*** CAT ***/
@@ -107,158 +103,185 @@ var playState = {
         game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/12', {fontSize: '32px', fill: '#000'});
         game.global.scoreText.fixedToCamera = true;
         game.global.scoreText.cameraOffset.setTo(16, 16);
-
     },
     
-    update: function() {
+    
+    
+    
+    update: function() {   
         
         /*** CHECK FOR WIN ***/
-        if (game.global.score == 12) {
+        if (game.global.score === 12) {
             game.state.start('win');
         }
         
-        
-        /*** CONTROLLER ***/
-        // this populates the cursors object with four properties: up, down, left, & right. All instances of Phaser.Key objects
-        cursors = game.input.keyboard.createCursorKeys();
-        
-        /*
-        if (game.global.control === 'Dad') {
-            controls(player, cat);
-        }
-        else if (game.global.control === 'cat') {
-            controls(cat, player);
-        }
-
- 
-        function controls (leader, follower) {
-        var hitsideWalk = game.physics.arcade.collide(player, bottomSidewalks);
-        var hittrashCan = game.physics.arcade.collide(player, trashCans);
-        var hithomeLedge = game.physics.arcade.collide(player, homeLedges);
-        }
-        */
-        
-        /*** PLAYER ***/    
-        // Collide the player with platforms
-        var hitsideWalk = game.physics.arcade.collide(player, bottomSidewalks);
-        var hittrashCan = game.physics.arcade.collide(player, trashCans);
-        var hithomeLedge = game.physics.arcade.collide(player, homeLedges);
-        
-        // reset the player's velocity
-        player.body.velocity.x = 0;
-        
-        if (cursors.left.isDown) {
-            player.body.velocity.x = -170;
-            player.animations.play('left');
-            game.global.facing = 'left';
-        }
-        else if (cursors.right.isDown) {
-            player.body.velocity.x = 170;
-            player.animations.play('right');
-            game.global.facing = 'right';
-        }
-        else if (game.global.facing === 'left') {
-            player.animations.stop();
-            player.frame = 1;       
-        }
-        else if (game.global.facing === 'right') {
-            player.animations.stop();
-            player.frame = 0;
-        }
-        
-        
-        // JUMP LOGIC 
-        if (cursors.up.isUp) { game.global.jumped = false; }
-        if (cursors.up.isDown && player.body.touching.down && (hitsideWalk || hittrashCan || hithomeLedge) && game.global.jumped == false) {
-            // velocity of 350 px/sec^2
-            player.body.velocity.y = -350;
-            game.global.jumped = true;
-        }
-        
-        
-        /*** CAT ***/
-        // Collide cat with platforms
-        game.physics.arcade.collide(cat, bottomSidewalks);
-        
-        // measure distance between Player and Cat
-        var distanceFromPlayer = ( cat.body.x - player.body.x );
-        
-        // Follow Player
-        if (cursors.left.isDown && (distanceFromPlayer > 54)) {
-            cat.body.velocity.x = -170;
-            cat.animations.play('left');
-        }
-        else if (cursors.right.isDown && (distanceFromPlayer < -46)) {
-            cat.body.velocity.x = 170;
-            cat.animations.play('right');
-        }
-        else {
-            cat.animations.stop();
-            cat.body.velocity.x = 0;
-            if (distanceFromPlayer > ( player.body.width/2 ) ) {
-                cat.frame = 1;
-            }
-            else if (distanceFromPlayer + 36 < ( player.body.width/2 ) ) {
-                cat.frame = 0;
-            }
-        }
-        
-        /*
-        if ( player.body.x + 44 >= cat.body.x && player.body.x + 42 <= cat.body.x) {
-            cat.body.velocity.x = 0;
-            cat.animations.stop();
-            cat.frame = 1;
-        } else if ( player.body.x - 18 <= cat.body.x && player.body.x - 16 >= cat.body.x ) {
-            cat.body.velocity.x = 0;
-            cat.animations.stop();
-            cat.frame = 0;
-        } else if ( player.body.x + 84 < cat.body.x ) {
-            cat.body.velocity.x = -140;
-            cat.animations.play('left');
-        } else if ( player.body.x - 38 > cat.body.x ) {
-            cat.body.velocity.x = 140;
-            cat.animations.play('right');
-        }
-        */
-        
-
-
-
-        /*** PIZZAS ***/    
+        /*** PIZZAS ***/
         // Collide pizzas with platforms
         game.physics.arcade.collide(pizzas, bottomSidewalks);
         game.physics.arcade.collide(pizzas, homeLedges);
         game.physics.arcade.collide(pizzas, trashCans);
-        
-        // check for pizza collision with the player, if found, pass player and pizza to the 'collectPizza' function
-        game.physics.arcade.overlap(player, pizzas, collectPizza, null, this);
-        
-        function collectPizza (player, pizza) {
-            // Removes the pizza from the screen
-            pizza.kill();
-
-            // Increment and update the score
-            game.global.score++;
-            game.global.scoreText.text = 'Pizza: ' + game.global.score + '/12';
-        }
-
-        /*** BADGUYS ***/ 
         game.physics.arcade.collide(badGuy, bottomSidewalks);
-        if ( badGuy.body.x==0 && badGuy.body.touching.down ) {
-            badGuy.body.velocity.x = 100;
-            badGuy.animations.play('right');
-        } else if (badGuy.body.x==(game.world.width - 32) && badGuy.body.touching.down) {
-            badGuy.body.velocity.x = -100;
-            badGuy.animations.play('left');
-        }
-
-        // Check for badGuy/player collision, if found, pass player and badGuy to gameOver function
-        game.physics.arcade.overlap(player, badGuy, gameOver, null, this);
         
-        function gameOver (player, badGuy) {
-            game.state.start('gameOver');
+        
+        
+        
+        
+        
+        /*** CONTROLLER ***/
+        cursors = game.input.keyboard.createCursorKeys();
+        
+        spacebarKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        
+        // allow one switch per key press
+        if (spacebarKey.isUp) {game.global.controlSwitchable = true}
+        
+        // SWITCH BEGINS
+        if (spacebarKey.isDown && game.global.controlSwitchable == true) {
+            game.global.controlSwitchable = false; //disable switch until key is released
+            switcher(game.global.control);
+        }     
+        
+        function switcher(controller) {
+            if (controller == 'dad') {
+                game.global.control = 'cat'; //toggle controls to other character
+            }
+            else if (controller == 'cat') {
+                game.global.control = 'dad'; //toggle controls to other character
+            }
+        }
+        
+        // assign controls to proper character each frame       
+        if (game.global.control === 'dad') {
+        
+            game.camera.focusOn(player);
+            controls(player, cat);
+        }
+        else if (game.global.control === 'cat') {
+            
+            game.camera.focusOn(cat);
+            controls(cat, player);
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        function controls (leader, follower) {
+            
+            var hitsideWalk = game.physics.arcade.collide(leader, bottomSidewalks);
+            var hittrashCan = game.physics.arcade.collide(leader, trashCans);
+            var hithomeLedge = game.physics.arcade.collide(leader, homeLedges);
+            game.physics.arcade.collide(follower, bottomSidewalks);
+            
+            leader.body.velocity.x = 0;
+            
+            if (cursors.left.isDown) {
+                if (leader == cat) {
+                    leader.body.velocity.x = -220;
+                } else {
+                    leader.body.velocity.x = -170;
+                }
+                leader.animations.play('left');
+                game.global.facing = 'left';
+            }
+            else if (cursors.right.isDown) {
+                if (leader == cat) {
+                    leader.body.velocity.x = 220;
+                } else {
+                    leader.body.velocity.x = 170;
+                }
+                leader.animations.play('right');
+                game.global.facing = 'right';
+            }
+            else if (game.global.facing === 'left') {
+                leader.animations.stop();
+                leader.frame = 1;       
+            }
+            else if (game.global.facing === 'right') {
+                leader.animations.stop();
+                leader.frame = 0;
+            }
+            
+            // JUMP LOGIC 
+            if (cursors.up.isUp) { game.global.jumped = false; }
+            if (cursors.up.isDown && leader.body.touching.down && (hitsideWalk || hittrashCan || hithomeLedge) && game.global.jumped == false) {
+                game.global.jumped = true;
+                if (leader == cat) {
+                    leader.body.velocity.y = -350;
+                } else {
+                    leader.body.velocity.y = -250;
+                }
+            }
+            
+            // measure distance between Follower and the Leader
+            var distanceFromPlayer = ( follower.body.x - leader.body.x );
+
+            // Follow the Leader
+            if (cursors.left.isDown && (distanceFromPlayer > (leader.body.width + 10) ) ) {
+                follower.body.velocity.x = -170;
+                follower.animations.play('left');
+            }
+            else if (cursors.right.isDown && (distanceFromPlayer < -(follower.body.width +10) ) ) {
+                follower.body.velocity.x = 170;
+                follower.animations.play('right');
+            }
+            else {
+                follower.animations.stop();
+                follower.body.velocity.x = 0;
+                if (distanceFromPlayer > (leader.body.width/2) ) {
+                    follower.frame = 1;
+                }
+                else if (distanceFromPlayer + 36 < (leader.body.width/2) ) {
+                    follower.frame = 0;
+                }
+            }
+            
+            // check for pizza collision with the player, if found, pass player and pizza to the 'collectPizza' function
+            game.physics.arcade.overlap(leader, pizzas, collectPizza, null, this);
+
+            function collectPizza (leader, pizza) {
+                // Removes the pizza from the screen
+                pizza.kill();
+
+                // Increment and update the score
+                game.global.score++;
+                game.global.scoreText.text = 'Pizza: ' + game.global.score + '/12';
+            }
+            
+            /*** BADGUYS ***/ 
+            if ( badGuy.body.x == 0 && badGuy.body.touching.down ) {
+                badGuy.body.velocity.x = 100;
+                badGuy.animations.play('right');
+            } else if (badGuy.body.x == (game.world.width - 32) && badGuy.body.touching.down) {
+                badGuy.body.velocity.x = -100;
+                badGuy.animations.play('left');
+            }
+
+            // Check for badGuy/leader collision, if found, pass leader and badGuy to gameOver function
+            game.physics.arcade.overlap(leader, badGuy, gameOver, null, this);
+
+            function gameOver (leader, badGuy) {
+                game.state.start('gameOver');
+            }
+            
         }
         
     },
+    
+    
+    
+
+    render: function () {
+        
+    },  
+
     
 };
