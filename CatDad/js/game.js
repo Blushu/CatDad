@@ -5,7 +5,8 @@ game.global = {
     score : 0,
     scoreText : '',
     jumped : false,
-    facing : 'left'
+    facing : 'left',
+    control : 'player'
 };
 
 // Add each state

@@ -2,14 +2,15 @@ var playState = {
     
     create: function() {
         
-// Set world bounds larger than the actual canvas       
-game.world.setBounds(0, 0, 1600, 1200);
+        // Set world bounds larger than the actual canvas       
+        game.world.setBounds(0, 0, 1600, 1200);
         
         // update Global Variable for restart
         game.global.score = 0;
         game.global.scoreText = '';
         game.global.jumped = false;
         game.global.facing = 'left';
+        game.global.control = 'player';
         
         // Add background
         background = game.add.sprite(0, 0, 'sky');
@@ -58,17 +59,15 @@ game.world.setBounds(0, 0, 1600, 1200);
         player.body.gravity.y = 400;
         player.body.collideWorldBounds = true;
         player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
-        player.animations.add( 'left', [11,12,13,14,15,16,17], 10, true );
-        
-//registration point
-player.anchor.setTo(0.5, 0.5);
-
-game.camera.follow(player);
+        player.animations.add( 'left', [10,11,12,13,14,15,16,17], 10, true );
+        //registration point for camera
+        player.anchor.setTo(0.5, 0.5);
+        game.camera.follow(player);
         
         
         
         /*** CAT ***/
-        cat = game.add.sprite( player.body.x + 64, game.world.height - 150, 'cat' );
+        cat = game.add.sprite( player.body.x + 44, game.world.height - 150, 'cat' );
         game.physics.arcade.enable(cat);
         cat.body.gravity.y = 400;
         cat.body.collideWorldBouncs = true;
@@ -85,10 +84,8 @@ game.camera.follow(player);
         for (i = 0; i < 12; i++) {
             // create a pizza in the 'pizzas' group
             var pizza = pizzas.create(i*130 + 10, (game.world.height/2), 'pizza');
-
             // give them gravity so they fall
             pizza.body.gravity.y = 60;
-
             // Give each pizza a slightly random bounce value
             pizza.body.bounce.y = ( 0.2 + ( Math.random()*0.2 ) );
         }
@@ -108,6 +105,8 @@ game.camera.follow(player);
 
         /*** SCORE ***/
         game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/12', {fontSize: '32px', fill: '#000'});
+        game.global.scoreText.fixedToCamera = true;
+        game.global.scoreText.cameraOffset.setTo(16, 16);
 
     },
     
@@ -122,8 +121,23 @@ game.camera.follow(player);
         /*** CONTROLLER ***/
         // this populates the cursors object with four properties: up, down, left, & right. All instances of Phaser.Key objects
         cursors = game.input.keyboard.createCursorKeys();
+        
+        /*
+        if (game.global.control === 'Dad') {
+            controls(player, cat);
+        }
+        else if (game.global.control === 'cat') {
+            controls(cat, player);
+        }
 
  
+        function controls (leader, follower) {
+        var hitsideWalk = game.physics.arcade.collide(player, bottomSidewalks);
+        var hittrashCan = game.physics.arcade.collide(player, trashCans);
+        var hithomeLedge = game.physics.arcade.collide(player, homeLedges);
+        }
+        */
+        
         /*** PLAYER ***/    
         // Collide the player with platforms
         var hitsideWalk = game.physics.arcade.collide(player, bottomSidewalks);
@@ -134,25 +148,24 @@ game.camera.follow(player);
         player.body.velocity.x = 0;
         
         if (cursors.left.isDown) {
-            // Move Left, Animate Left
             player.body.velocity.x = -170;
             player.animations.play('left');
             game.global.facing = 'left';
         }
         else if (cursors.right.isDown) {
-            // Move Right, Animate Right
             player.body.velocity.x = 170;
             player.animations.play('right');
             game.global.facing = 'right';
-        }
-        else if (game.global.facing === 'right') {
-            player.animations.stop();
-            player.frame = 0;
         }
         else if (game.global.facing === 'left') {
             player.animations.stop();
             player.frame = 1;       
         }
+        else if (game.global.facing === 'right') {
+            player.animations.stop();
+            player.frame = 0;
+        }
+        
         
         // JUMP LOGIC 
         if (cursors.up.isUp) { game.global.jumped = false; }
@@ -167,7 +180,31 @@ game.camera.follow(player);
         // Collide cat with platforms
         game.physics.arcade.collide(cat, bottomSidewalks);
         
-        if ( player.body.x + 64 >= cat.body.x && player.body.x + 62 <= cat.body.x) {
+        // measure distance between Player and Cat
+        var distanceFromPlayer = ( cat.body.x - player.body.x );
+        
+        // Follow Player
+        if (cursors.left.isDown && (distanceFromPlayer > 54)) {
+            cat.body.velocity.x = -170;
+            cat.animations.play('left');
+        }
+        else if (cursors.right.isDown && (distanceFromPlayer < -46)) {
+            cat.body.velocity.x = 170;
+            cat.animations.play('right');
+        }
+        else {
+            cat.animations.stop();
+            cat.body.velocity.x = 0;
+            if (distanceFromPlayer > ( player.body.width/2 ) ) {
+                cat.frame = 1;
+            }
+            else if (distanceFromPlayer + 36 < ( player.body.width/2 ) ) {
+                cat.frame = 0;
+            }
+        }
+        
+        /*
+        if ( player.body.x + 44 >= cat.body.x && player.body.x + 42 <= cat.body.x) {
             cat.body.velocity.x = 0;
             cat.animations.stop();
             cat.frame = 1;
@@ -182,6 +219,7 @@ game.camera.follow(player);
             cat.body.velocity.x = 140;
             cat.animations.play('right');
         }
+        */
         
 
 
