@@ -17,10 +17,6 @@ var loadState = {
         game.load.spritesheet('catDad', 'assets/catDad_Sheet.png', 44, 64);
         game.load.spritesheet('cat', 'assets/CatSprite_Sheet.png', 36, 40);
         
-        // Set Global Variables
-        var score = 0;
-        var scoreText;
-        var jumped = false;
     },
     
     init: function () {
