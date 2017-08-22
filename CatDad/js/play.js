@@ -11,12 +11,11 @@ var playState = {
         game.global.jumped = false;
         game.global.facing = 'left';
         game.global.control = 'dad';
-        
+    
+    /*** ENVIRONMENT ***/
         // Add background
         background = game.add.sprite(0, 0, 'sky');
         background.scale.setTo(2,2);
-        
-        
         
         /*** SIDEWALK ***/
         // walkable sidewalk, bottom half
@@ -53,26 +52,29 @@ var playState = {
 
 
 
-        /*** PLAYER ***/
-        player = game.add.sprite( game.world.width*0.8 - 16, game.world.height - 150, 'catDad' );
-        game.physics.arcade.enable(player);
-        player.body.gravity.y = 400;
-        player.body.collideWorldBounds = true;
-        player.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
-        player.animations.add( 'left', [10,11,12,13,14,15,16,17], 10, true );
+    /*** PLAYERS ***/
+        /*** DAD ***/
+        dad = game.add.sprite( game.world.width*0.8 - 16, game.world.height - 150, 'catDad' );
+        game.physics.arcade.enable(dad);
+        dad.body.gravity.y = 400;
+        dad.body.collideWorldBounds = true;
+        dad.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
+        dad.animations.add( 'left', [10,11,12,13,14,15,16,17], 10, true );
         
         
         /*** CAT ***/
-        cat = game.add.sprite( player.body.x + 44, game.world.height - 150, 'cat' );
+        cat = game.add.sprite( dad.body.x + 44, game.world.height - 150, 'cat' );
         game.physics.arcade.enable(cat);
         cat.body.gravity.y = 400;
-        cat.body.collideWorldBouncs = true;
+        cat.body.collideWorldBounds = true;
         cat.animations.add('right', [2,3,4], 10, true);
         cat.animations.add('left', [5,6,7], 10, true);
 
 
+        
+        
 
-
+    /*** COLLECTABLES ***/
         /*** PIZZAS ***/
         pizzas = game.add.group();
         pizzas.enableBody = true;
@@ -81,24 +83,27 @@ var playState = {
             // create a pizza in the 'pizzas' group
             var pizza = pizzas.create(i*130 + 10, (game.world.height/2), 'pizza');
             // give them gravity so they fall
-            pizza.body.gravity.y = 60;
+            pizza.body.gravity.y = 80;
             // Give each pizza a slightly random bounce value
             pizza.body.bounce.y = ( 0.2 + ( Math.random()*0.2 ) );
         }
         
         
+        
+        
+        
+    /*** ENEMIES ***/
+        /*** DOG ***/    
+        dog = game.add.sprite(0, game.world.height - 150, 'baddie');
+        game.physics.arcade.enable(dog);
+        dog.body.gravity.y = 300;
+        dog.body.collideWorldBounds = true;
+        dog.animations.add('left', [0,1], 6, true);
+        dog.animations.add('right', [2,3], 6, true);
 
-        /*** BADGUYS ***/    
-        badGuy = game.add.sprite(0, game.world.height - 150, 'baddie');
-        game.physics.arcade.enable(badGuy);
-        badGuy.body.gravity.y = 300;
-        badGuy.body.collideWorldBounds = true;
-        badGuy.animations.add('left', [0,1], 6, true);
-        badGuy.animations.add('right', [2,3], 6, true);
 
 
-
-
+    /*** PLAYER DATA ***/
         /*** SCORE ***/
         game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/12', {fontSize: '32px', fill: '#000'});
         game.global.scoreText.fixedToCamera = true;
@@ -108,143 +113,147 @@ var playState = {
     
     
     
+    
+    
+    
+    
+    
+    
+    
     update: function() {   
         
-        /*** CHECK FOR WIN ***/
+    /*** CHECK FOR WIN ***/
         if (game.global.score === 12) {
             game.state.start('win');
         }
         
-        /*** PIZZAS ***/
+    /*** GENERAL COLLISIONS ***/
         // Collide pizzas with platforms
         game.physics.arcade.collide(pizzas, bottomSidewalks);
         game.physics.arcade.collide(pizzas, homeLedges);
         game.physics.arcade.collide(pizzas, trashCans);
-        game.physics.arcade.collide(badGuy, bottomSidewalks);
+        // Collide dog with sidewalk
+        game.physics.arcade.collide(dog, bottomSidewalks);
         
         
         
         
         
         
-        /*** CONTROLLER ***/
-        cursors = game.input.keyboard.createCursorKeys();
         
-        spacebarKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    /*** INPUT ***/
+        cursors = game.input.keyboard.createCursorKeys(); //movement
+        spacebarKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR); //switch character
         
-        // allow one switch per key press
-        if (spacebarKey.isUp) {game.global.controlSwitchable = true}
+    /*** SWITCH FUNCTIONALITY ***/
+        if (spacebarKey.isUp) {game.global.controlSwitchable = true} //allow one switch per key press
         
-        // SWITCH BEGINS
+        // Check for switchability
         if (spacebarKey.isDown && game.global.controlSwitchable == true) {
             game.global.controlSwitchable = false; //disable switch until key is released
             switcher(game.global.control);
         }     
         
+        // Do the actual switch
         function switcher(controller) {
-            if (controller == 'dad') {
-                game.global.control = 'cat'; //toggle controls to other character
-            }
-            else if (controller == 'cat') {
-                game.global.control = 'dad'; //toggle controls to other character
+            switch(controller) {
+                case 'dad': game.global.control = 'cat'; break;
+                case 'cat': game.global.control = 'dad';
             }
         }
         
-        // assign controls to proper character each frame       
-        if (game.global.control === 'dad') {
-        
-            game.camera.focusOn(player);
-            controls(player, cat);
+        // assign controls to proper character each frame 
+        switch(game.global.control) {
+            case 'dad':
+                game.camera.focusOn(dad);
+                controls(dad, cat);
+                break;
+            case 'cat':
+                game.camera.focusOn(cat);
+                controls(cat, dad);
         }
-        else if (game.global.control === 'cat') {
-            
-            game.camera.focusOn(cat);
-            controls(cat, player);
-        }
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-
+    /*** CONTROLS ***/
         function controls (leader, follower) {
             
+            // collide with platforms, variables used for jumping
             var hitsideWalk = game.physics.arcade.collide(leader, bottomSidewalks);
             var hittrashCan = game.physics.arcade.collide(leader, trashCans);
             var hithomeLedge = game.physics.arcade.collide(leader, homeLedges);
+            // only the leader can climb the platforms
             game.physics.arcade.collide(follower, bottomSidewalks);
             
             leader.body.velocity.x = 0;
             
+        // MOVEMENT L & R
             if (cursors.left.isDown) {
-                if (leader == cat) {
-                    leader.body.velocity.x = -220;
-                } else {
-                    leader.body.velocity.x = -170;
+                switch (leader) {
+                    case dad: leader.body.velocity.x = -220; break;
+                    case cat: leader.body.velocity.x = -170;              
                 }
                 leader.animations.play('left');
                 game.global.facing = 'left';
             }
             else if (cursors.right.isDown) {
-                if (leader == cat) {
-                    leader.body.velocity.x = 220;
-                } else {
-                    leader.body.velocity.x = 170;
+                switch (leader) {
+                    case dad: leader.body.velocity.x = 220; break;
+                    case cat: leader.body.velocity.x = 170;              
                 }
                 leader.animations.play('right');
                 game.global.facing = 'right';
             }
-            else if (game.global.facing === 'left') {
+            else {
                 leader.animations.stop();
-                leader.frame = 1;       
-            }
-            else if (game.global.facing === 'right') {
-                leader.animations.stop();
-                leader.frame = 0;
-            }
-            
-            // JUMP LOGIC 
-            if (cursors.up.isUp) { game.global.jumped = false; }
-            if (cursors.up.isDown && leader.body.touching.down && (hitsideWalk || hittrashCan || hithomeLedge) && game.global.jumped == false) {
-                game.global.jumped = true;
-                if (leader == cat) {
-                    leader.body.velocity.y = -350;
-                } else {
-                    leader.body.velocity.y = -250;
+                switch (game.global.facing) {
+                    case 'left': leader.frame = 1; break;
+                    case 'right': leader.frame = 0;
                 }
             }
             
-            // measure distance between Follower and the Leader
-            var distanceFromPlayer = ( follower.body.x - leader.body.x );
+             // measure distance between Follower and the Leader
+            var distanceFromLeader = ( follower.body.x - leader.body.x );
 
-            // Follow the Leader
-            if (cursors.left.isDown && (distanceFromPlayer > (leader.body.width + 10) ) ) {
-                follower.body.velocity.x = -170;
+        // FOLLOW THE LEADER
+            if (cursors.left.isDown && (distanceFromLeader > (leader.body.width + 10) ) ) {
                 follower.animations.play('left');
+                switch (leader) {
+                    case dad: follower.body.velocity.x = -220; break;
+                    case cat: follower.body.velocity.x = -170;              
+                }
             }
-            else if (cursors.right.isDown && (distanceFromPlayer < -(follower.body.width +10) ) ) {
-                follower.body.velocity.x = 170;
+            else if (cursors.right.isDown && (distanceFromLeader < -(follower.body.width +10) ) ) {
                 follower.animations.play('right');
+                switch (leader) {
+                    case dad: follower.body.velocity.x = 220; break;
+                    case cat: follower.body.velocity.x = 170;              
+                }
             }
+            // FACE THE LEADER
             else {
                 follower.animations.stop();
                 follower.body.velocity.x = 0;
-                if (distanceFromPlayer > (leader.body.width/2) ) {
+                if (distanceFromLeader > (leader.body.width/2) ) {
                     follower.frame = 1;
                 }
-                else if (distanceFromPlayer + 36 < (leader.body.width/2) ) {
+                else if (distanceFromLeader + 36 < (leader.body.width/2) ) {
                     follower.frame = 0;
                 }
             }
             
-            // check for pizza collision with the player, if found, pass player and pizza to the 'collectPizza' function
+        // JUMP LOGIC 
+            if (cursors.up.isUp) { game.global.jumped = false; } // allow one jump per key press
+            if (cursors.up.isDown && leader.body.touching.down && (hitsideWalk || hittrashCan || hithomeLedge) && game.global.jumped == false) {
+                game.global.jumped = true;
+                switch (leader) {
+                    case dad: leader.body.velocity.y = -250; break;
+                    case cat: leader.body.velocity.y = -350;
+                }
+            }
+            
+           
+            
+        // check for pizza collision with the leader, if found, pass leader and pizza to the 'collectPizza' function
             game.physics.arcade.overlap(leader, pizzas, collectPizza, null, this);
 
             function collectPizza (leader, pizza) {
@@ -256,32 +265,34 @@ var playState = {
                 game.global.scoreText.text = 'Pizza: ' + game.global.score + '/12';
             }
             
-            /*** BADGUYS ***/ 
-            if ( badGuy.body.x == 0 && badGuy.body.touching.down ) {
-                badGuy.body.velocity.x = 100;
-                badGuy.animations.play('right');
-            } else if (badGuy.body.x == (game.world.width - 32) && badGuy.body.touching.down) {
-                badGuy.body.velocity.x = -100;
-                badGuy.animations.play('left');
+        /*** DOG MOVEMENT ***/
+            if ( dog.body.x == 0 && dog.body.touching.down ) {
+                dog.body.velocity.x = 100;
+                dog.animations.play('right');
+            } else if (dog.body.x == (game.world.width - 32) && dog.body.touching.down) {
+                dog.body.velocity.x = -100;
+                dog.animations.play('left');
             }
+            
+        /*** CHECK FOR GAMEOVER ***/
+            // Check for dog/leader collision, if found, pass leader and dog to gameOver function
+            game.physics.arcade.overlap(leader, dog, gameOver, null, this);
 
-            // Check for badGuy/leader collision, if found, pass leader and badGuy to gameOver function
-            game.physics.arcade.overlap(leader, badGuy, gameOver, null, this);
-
-            function gameOver (leader, badGuy) {
+            function gameOver (/*leader, dog*/) {
                 game.state.start('gameOver');
             }
+
+            
             
         }
         
     },
     
-    
-    
-
+/*
     render: function () {
         
     },  
+*/
 
     
 };

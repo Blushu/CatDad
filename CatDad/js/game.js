@@ -8,15 +8,7 @@ game.global = {
     facing : 'left',
     control : 'dad',
     controlSwitchable : true,
-    switching: false,
-    originalTime: 0,
-    currentTime: 0,
-    originalX: 0,
-    originalY: 0,
-    deltaX: 0,
-    deltaY: 0,
-    deltaTime: 0,
-    duration: 1
+    switching: false
 };
 
 // Add each state
