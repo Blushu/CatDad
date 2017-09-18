@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="https://necolas.github.io/normalize.css/5.0.0/normalize.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        
+        <!-- Load states -->
+        <script type="text/javascript" src="//cdn.jsdelivr.net/phaser/2.2.2/phaser.min.js"></script>
+        <script type="text/javascript" src="js/boot.js"></script>
+        <script type="text/javascript" src="js/load.js"></script>
+        <script type="text/javascript" src="js/menu.js"></script>
+        <script type="text/javascript" src="js/play.js"></script>
+        <script type="text/javascript" src="js/win.js"></script>
+        <script type="text/javascript" src="js/gameOver.js"></script>
+        <script type="text/javascript" src="js/game.js"></script>
+        
+        <title>CATDAD - An Indie Platform Adventure Through the Ups and Downs of Feline Fatherhood</title>
+        
+        <link rel="stylesheet" href="styles/style.css">
+    </head>
+    
+    <body>
+        
+        <div class="container-fluid">
+        
+            <div class="row">
+                <div class="col-md-2 col-lg-3"></div>
+                <div class="col-xs-6 col-md-8 col-lg-6 title-col">
+                    <h1><span id="cat-title">CAT</span><span id="dad-title">DAD</span></h1>
+                    <h2>An Indie Platform Adventure through the Ups and Downs of Feline Fatherhood</h2>
+                </div>
+                <div class="col-md-2 col-lg-3"></div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12 subtitle-col">
+                    
+                </div>
+            </div>
+
+            <div class="row">  
+                <div class="col-xs-12 game-col">
+                    <!-- game.js maps to this div: -->
+                    <div id="gameDiv"></div>
+                </div>
+            </div>  
+
+        </div>
+    </body>
+</html>
