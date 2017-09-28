@@ -1,4 +1,4 @@
 # CatDad
 An Indie Platform Adventure through the Ups and Down of Feline Fatherhood.
 
-Open index.html to begin
+Visit www.catanddad.com to play the work in progress!
