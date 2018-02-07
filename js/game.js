@@ -1,6 +1,7 @@
-// Dimensions of game, ID of element where game will go
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'gameDiv');
+// Create the game (dimensions, renderer (Phaser.AUTO detects WEBGL/CANVAS/HEADLESS and reacts appropriately), ID of element where canvas will be injected)
+var game = new Phaser.Game( 800 , 600 , Phaser.AUTO , 'gameDiv' );
 
+// Global Variables
 game.global = {
     score : 0,
     scoreText : '',
@@ -19,5 +20,5 @@ game.state.add('play', playState);
 game.state.add('win', winState);
 game.state.add('gameOver', gameOverState);
 
-// Start the game by calling the boot state
+// Call the bootstate to enable physics
 game.state.start('boot');
