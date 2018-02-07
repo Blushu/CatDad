@@ -11,8 +11,21 @@ var playState = {
         game.global.jumped = false;
         game.global.facing = 'left';
         game.global.control = 'dad';
-    
+
+    /*** AUDIO ***/    
+        // Add Audio (nickname, volume 0-1, looping defaults false)
+        music = game.add.audio('background1', 0.6, true);
+        dadjumpsound = game.add.audio('dadjump');
+        dadcontrolsound = game.add.audio('dadcontrol');
+        dadbumpsound = game.add.audio('dadbump');
+        catjumpsound = game.add.audio('catjump');
+        pizzasound = game.add.audio('pizza', 0.8);
+        
+        // Play background Music
+        music.play();
+        
     /*** ENVIRONMENT ***/
+        
         // Add background
         background = game.add.sprite(0, 0, 'sky');
         background.scale.setTo(2,2);
@@ -169,8 +182,10 @@ var playState = {
                 controls(dad, cat);
                 break;
             case 'cat':
+                dadcontrolsound.play();
                 game.camera.focusOn(cat);
                 controls(cat, dad);
+                break;
         }
         
         
@@ -246,8 +261,14 @@ var playState = {
             if (cursors.up.isDown && leader.body.touching.down && (hitsideWalk || hittrashCan || hithomeLedge) && game.global.jumped == false) {
                 game.global.jumped = true;
                 switch (leader) {
-                    case dad: leader.body.velocity.y = -250; break;
-                    case cat: leader.body.velocity.y = -350;
+                    case dad: 
+                        leader.body.velocity.y = -250; 
+                        dadjumpsound.play();
+                        break;
+                    case cat:
+                        leader.body.velocity.y = -350;
+                        catjumpsound.play();
+                        break;
                 }
             }
             
@@ -259,6 +280,7 @@ var playState = {
             function collectPizza (leader, pizza) {
                 // Removes the pizza from the screen
                 pizza.kill();
+                pizzasound.play();
 
                 // Increment and update the score
                 game.global.score++;
@@ -279,6 +301,7 @@ var playState = {
             game.physics.arcade.overlap(leader, dog, gameOver, null, this);
 
             function gameOver (/*leader, dog*/) {
+                music.destroy();
                 game.state.start('gameOver');
             }
 
