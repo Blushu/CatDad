@@ -92,7 +92,7 @@ var playState = {
         pizzas = game.add.group();
         pizzas.enableBody = true;
         // create 12 pizzas evenly spaced apart
-		var pizza_count = 10;
+		pizza_count = 10;
         for (i = 0; i < pizza_count; i++) {
             // create a pizza in the 'pizzas' group
             var pizza = pizzas.create(i*130 + 10, (game.world.height/2), 'pizza');
