@@ -11,7 +11,9 @@ var playState = {
         game.global.jumped = false;
         game.global.facing = 'left';
         game.global.control = 'dad';
-
+        game.global.pizza_count = 10;
+        game.global.gravity = 450;
+    
     /*** AUDIO ***/    
         // Add Audio (nickname, volume 0-1, looping defaults false)
         music = game.add.audio('background1', 0.6, true);
@@ -51,6 +53,7 @@ var playState = {
         homeLedges.enableBody = true;
         for (i=0; i<4; i++) {
             var homeLedge = homeLedges.create(210, game.world.height - (204 + i*120), 'homeLedge');
+            homeLedge.body.checkCollision.down = false;
             homeLedge.body.immovable = true;
         }
         
@@ -69,7 +72,7 @@ var playState = {
         /*** DAD ***/
         dad = game.add.sprite( game.world.width*0.8 - 16, game.world.height - 150, 'catDad' );
         game.physics.arcade.enable(dad);
-        dad.body.gravity.y = 400;
+        dad.body.gravity.y = game.global.gravity;
         dad.body.collideWorldBounds = true;
         dad.animations.add( 'right', [2,3,4,5,6,7,8,9], 10, true );
         dad.animations.add( 'left', [10,11,12,13,14,15,16,17], 10, true );
@@ -78,7 +81,7 @@ var playState = {
         /*** CAT ***/
         cat = game.add.sprite( dad.body.x + 44, game.world.height - 150, 'cat' );
         game.physics.arcade.enable(cat);
-        cat.body.gravity.y = 400;
+        cat.body.gravity.y = game.global.gravity;
         cat.body.collideWorldBounds = true;
         cat.animations.add('right', [2,3,4], 10, true);
         cat.animations.add('left', [5,6,7], 10, true);
@@ -92,8 +95,7 @@ var playState = {
         pizzas = game.add.group();
         pizzas.enableBody = true;
         // create 12 pizzas evenly spaced apart
-		pizza_count = 10;
-        for (i = 0; i < pizza_count; i++) {
+        for (i = 0; i < game.global.pizza_count; i++) {
             // create a pizza in the 'pizzas' group
 			var drop_height = (i == 2) ? (game.world.height/2) : (game.world.height * 0.9);
 			
@@ -114,7 +116,7 @@ var playState = {
         /*** DOG ***/    
         dog = game.add.sprite(0, game.world.height - 150, 'baddie');
         game.physics.arcade.enable(dog);
-        dog.body.gravity.y = 300;
+        dog.body.gravity.y = game.global.gravity;
         dog.body.collideWorldBounds = true;
         dog.animations.add('left', [0,1], 6, true);
         dog.animations.add('right', [2,3], 6, true);
@@ -123,7 +125,7 @@ var playState = {
 
     /*** PLAYER DATA ***/
         /*** SCORE ***/
-        game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/' + pizza_count, {fontSize: '32px', fill: '#000'});
+        game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/' + game.global.pizza_count, {fontSize: '32px', fill: '#000'});
         game.global.scoreText.fixedToCamera = true;
         game.global.scoreText.cameraOffset.setTo(16, 16);
     },
@@ -141,7 +143,7 @@ var playState = {
     update: function() {   
         
     /*** CHECK FOR WIN ***/
-        if (game.global.score === pizza_count) {
+        if (game.global.score === game.global.pizza_count) {
 			music.destroy();
 			game.state.start('win');
         }
@@ -268,7 +270,7 @@ var playState = {
                 game.global.jumped = true;
                 switch (leader) {
                     case dad: 
-                        leader.body.velocity.y = -250; 
+                        leader.body.velocity.y = -240; 
                         dadjumpsound.play();
                         break;
                     case cat:
@@ -290,7 +292,7 @@ var playState = {
 
                 // Increment and update the score
                 game.global.score++;
-                game.global.scoreText.text = 'Pizza: ' + game.global.score + '/' + pizza_count;
+                game.global.scoreText.text = 'Pizza: ' + game.global.score + '/' + game.global.pizza_count;
             }
             
         /*** DOG MOVEMENT ***/
