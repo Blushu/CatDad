@@ -137,7 +137,8 @@ var playState = {
         
     /*** CHECK FOR WIN ***/
         if (game.global.score === 12) {
-            game.state.start('win');
+			music.destroy();
+			game.state.start('win');
         }
         
     /*** GENERAL COLLISIONS ***/
