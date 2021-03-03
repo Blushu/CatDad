@@ -95,7 +95,7 @@ var playState = {
 		pizza_count = 10;
         for (i = 0; i < pizza_count; i++) {
             // create a pizza in the 'pizzas' group
-			var drop_height = (i == 2) ? (game.world.height/2) : (game.world.height/5);
+			var drop_height = (i == 2) ? (game.world.height/2) : (game.world.height/10);
 			
 			console.log(drop_height);
 			
