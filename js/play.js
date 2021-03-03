@@ -92,7 +92,8 @@ var playState = {
         pizzas = game.add.group();
         pizzas.enableBody = true;
         // create 12 pizzas evenly spaced apart
-        for (i = 0; i < 12; i++) {
+		var pizza_count = 10;
+        for (i = 0; i < pizza_count; i++) {
             // create a pizza in the 'pizzas' group
             var pizza = pizzas.create(i*130 + 10, (game.world.height/2), 'pizza');
             // give them gravity so they fall
@@ -118,7 +119,7 @@ var playState = {
 
     /*** PLAYER DATA ***/
         /*** SCORE ***/
-        game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/12', {fontSize: '32px', fill: '#000'});
+        game.global.scoreText = game.add.text(16, 16, 'Pizza: 0/' + pizza_count, {fontSize: '32px', fill: '#000'});
         game.global.scoreText.fixedToCamera = true;
         game.global.scoreText.cameraOffset.setTo(16, 16);
     },
@@ -136,7 +137,7 @@ var playState = {
     update: function() {   
         
     /*** CHECK FOR WIN ***/
-        if (game.global.score === 12) {
+        if (game.global.score === pizza_count) {
 			music.destroy();
 			game.state.start('win');
         }
@@ -285,7 +286,7 @@ var playState = {
 
                 // Increment and update the score
                 game.global.score++;
-                game.global.scoreText.text = 'Pizza: ' + game.global.score + '/12';
+                game.global.scoreText.text = 'Pizza: ' + game.global.score + '/' + pizza_count;
             }
             
         /*** DOG MOVEMENT ***/
