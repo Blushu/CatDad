@@ -95,7 +95,7 @@ var playState = {
 		pizza_count = 10;
         for (i = 0; i < pizza_count; i++) {
             // create a pizza in the 'pizzas' group
-            var pizza = pizzas.create(i*130 + 10, (game.world.height/2), 'pizza');
+            var pizza = pizzas.create(i*130 + 10, (game.world.height * 0.1), 'pizza');
             // give them gravity so they fall
             pizza.body.gravity.y = 80;
             // Give each pizza a slightly random bounce value
