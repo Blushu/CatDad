@@ -16,12 +16,12 @@ var playState = {
     
     /*** AUDIO ***/    
         // Add Audio (nickname, volume 0-1, looping defaults false)
-        music = game.add.audio('background1', 0.6, true);
+        music = game.add.audio('background1', 0.7, true);
         dadjumpsound = game.add.audio('dadjump');
         dadcontrolsound = game.add.audio('dadcontrol');
-        dadbumpsound = game.add.audio('dadbump');
-        catjumpsound = game.add.audio('catjump');
-        pizzasound = game.add.audio('pizza', 0.8);
+        dadbumpsound = game.add.audio('dadbump', 0.8);
+        catjumpsound = game.add.audio('catjump', 0.8);
+        pizzasound = game.add.audio('pizza', 0.6);
         
         // Play background Music
         music.play();
